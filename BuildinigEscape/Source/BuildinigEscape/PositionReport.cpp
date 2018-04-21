@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PositionReport.h"
+#include "Runtime/Engine/Classes/GameFramework/Actor.h"
 
 
 // Sets default values for this component's properties
@@ -19,8 +20,15 @@ void UPositionReport::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	FString objectName = GetOwner()->GetName();
+	FVector pos = GetOwner()->GetTransform().GetLocation();
 	
+	FString objectPos = pos.ToString();
+	
+	UE_LOG(LogTemp, Warning, TEXT("%s is at %s"), *objectName, *objectPos);
+	//FTransform transform = GetOwner()->GetTransform();
+	//transform.SetLocation(FVector(pos.X, pos.Y, pos.Z+150));
+	//GetOwner()->SetActorTransform(transform);
 }
 
 
@@ -28,7 +36,5 @@ void UPositionReport::BeginPlay()
 void UPositionReport::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
