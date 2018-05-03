@@ -2,6 +2,7 @@
 
 #include "OpenDoor.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
+#include "Runtime/Engine/Classes/Components/PrimitiveComponent.h"
 #include "Engine/World.h"
 
 // Sets default values for this component's properties
@@ -17,18 +18,9 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	owner = GetOwner();
-	ActorThatOpen = GetWorld()->GetFirstPlayerController()->GetPawn();
-
-	//AActor * owner = GetOwner();
-	//FRotator rotator = FRotator(0.f, -60.f, 0.f);
-
-	//FString rot = owner->GetActorRotation().ToString();
-
-	//UE_LOG(LogTemp, Warning, TEXT("ROTATION : %s"), *rot);
-	//owner->SetActorRotation(rotator);
-	//rot = owner->GetActorRotation().ToString();
-	//UE_LOG(LogTemp, Warning, TEXT("ROTATION : %s"), *rot);
+	Owner = GetOwner();
+	if (!PressurePlate)
+		UE_LOG(LogTemp, Error, TEXT("Missing Pressure Plate Object!!"));
 }
 
 
@@ -37,25 +29,46 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (PressurePlate->IsOverlappingActor(ActorThatOpen))
+	if (GetTotalMassOnPlate() >= TotalMassPlate)
 	{
 		OpenDoor();
+		//LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 	}
 	else
 	{
 		CloseDoor();
 	}
+
+	//if (GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorCloseDelay)
+	//{
+	//}
 }
 
 void UOpenDoor::OpenDoor()
 {
-	FRotator rotator = FRotator(0.f, -60.f, 0.f);
-	owner->SetActorRotation(rotator);
+	//Owner->SetActorRotation(FRotator(0.f, OpenAngle, 0.f));
+	OnOpenRequest.Broadcast();
 }
 
 void UOpenDoor::CloseDoor()
 {
-	FRotator rotator = FRotator(0.f, 0.f, 0.f);
-	owner->SetActorRotation(rotator);
+	//Owner->SetActorRotation(FRotator(0.f, 0.f, 0.f));
+	OnCloseRequest.Broadcast();
+}
+
+float UOpenDoor::GetTotalMassOnPlate()
+{
+	float TotalMass = 0.f;
+	TArray<AActor *> OverlappingActors;
+	if (!PressurePlate) { return TotalMass; }
+	PressurePlate->GetOverlappingActors(OverlappingActors);
+
+	for (const auto& Actor : OverlappingActors)
+	{
+		TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+		//UE_LOG(LogTemp, Warning, TEXT("TOTAL MASS : %s"), *FString::SanitizeFloat(TotalMass));
+	}
+
+	return TotalMass;
 }
 
