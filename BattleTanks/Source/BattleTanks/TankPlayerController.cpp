@@ -5,42 +5,21 @@
 #include "Engine/World.h"
 #include "Tank.h"
 
-void ATankPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
-
-	ATank * ControlledTank = GetControlledTank();
-
-	if (!ControlledTank)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player controller not possesing a Tank"));
-	}
-	else
-	{
-
-		UE_LOG(LogTemp, Warning, TEXT("POSSESSED TANK : %s"), *(ControlledTank->GetName()));
-	}
-}
-
 void ATankPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	AimTowardsCrossHair();
 }
 
-ATank * ATankPlayerController::GetControlledTank() const
-{
-	return Cast<ATank>(GetPawn());
-}
-
 void ATankPlayerController::AimTowardsCrossHair()
 {
-	if (!GetControlledTank()) { return; };
+	ATank * PlayerTank = Cast<ATank>(GetPawn());
+	if (!PlayerTank) { return; };
 
 	FVector HitLocation;
 	if (GetSightRayHitLocation(HitLocation))
 	{
-		GetControlledTank()->AimAt(HitLocation);
+		PlayerTank->AimAt(HitLocation);
 	}
 }
 

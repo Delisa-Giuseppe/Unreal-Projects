@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "Tank.h"
 #include "TankTurret.h"
+#include "TankPlayerController.h"
 
 // Sets default values for this component's properties
 UTankAimingComponent::UTankAimingComponent()
@@ -61,7 +62,9 @@ void UTankAimingComponent::SetTurret(UTankTurret * TurretToSet)
 
 void UTankAimingComponent::MoveBarrelTurret(FVector AimDirection) const
 {
+	//ATankPlayerController * PlayerController = Cast<ATankPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	FRotator BarrelRotator = Barrel->GetForwardVector().Rotation();
+	//FRotator CameraRotator = PlayerController->PlayerCameraManager->GetCameraLocation().ForwardVector.Rotation();
 	FRotator AimRotator = AimDirection.Rotation();
 	FRotator DeltaRotation = AimRotator - BarrelRotator;
 
