@@ -9,6 +9,7 @@
 class ATank;
 class UTankBarrel;
 class UTankTurret;
+class AProjectile;
 
 UENUM()
 enum class EFiringState : uint8 { Locked, Aiming, Reloading};
@@ -22,16 +23,35 @@ class BATTLETANKS_API UTankAimingComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UTankBarrel * Barrel = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = Firing)
+	float LaunchSpeed = 4000.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category = Firing)
+	float ReloadTimeSeconds = 3.f;
+
 	UTankAimingComponent();
-	void AimAt(FVector HitLocation, float LaunchSpeed);
+	
+	void AimAt(FVector HitLocation);
+	
 	UFUNCTION(BlueprintCallable, Category = Setup)
 	void Initialise(UTankBarrel * BarrelToSet, UTankTurret * TurretToSet);
+
+	// Sets default values for this pawn's properties
+	UPROPERTY(EditDefaultsOnly, Category = FireSystem)
+	TSubclassOf<AProjectile> ProjectileBluePrint;
+
+	UFUNCTION(BlueprintCallable, Category = FireSystem)
+	void Fire();
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = State)
 	EFiringState FiringState = EFiringState::Locked;
 
 private:
+
+	double LastFireTime = 0;
+
 	UTankTurret * Turret = nullptr;
 	void MoveBarrelTurret(FVector AimDirection) const;
 };
