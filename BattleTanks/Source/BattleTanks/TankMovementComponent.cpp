@@ -5,7 +5,7 @@
 
 void UTankMovementComponent::Initialise(UTankTrack * LeftTrackToSet, UTankTrack * RightTrackToSet)
 {
-	if (!LeftTrackToSet || !RightTrackToSet) { return; }
+	if (!ensure(LeftTrackToSet) || !ensure(RightTrackToSet)) { return; }
 	LeftTrack = LeftTrackToSet;
 	RightTrack = RightTrackToSet;
 }
@@ -20,5 +20,17 @@ void UTankMovementComponent::TurnRight(float Throw)
 {
 	LeftTrack->SetThrottle(Throw);
 	RightTrack->SetThrottle(-Throw);
+}
+
+void UTankMovementComponent::RequestDirectMove(const FVector & MoveVelocity, bool bForceMaxSpeed)
+{
+	FVector AIForwardVector = GetOwner()->GetActorForwardVector().GetSafeNormal();
+	FVector AIMoveVelocity = MoveVelocity.GetSafeNormal();
+
+	float ForwardThrow = FVector::DotProduct(AIForwardVector, AIMoveVelocity);
+	MoveForward(ForwardThrow);
+
+	float TurnMovement = FVector::CrossProduct(AIForwardVector, AIMoveVelocity).Z;
+	TurnRight(TurnMovement);
 }
 
