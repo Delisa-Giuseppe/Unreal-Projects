@@ -41,17 +41,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = FireSystem)
 	TSubclassOf<AProjectile> ProjectileBluePrint;
 
+	virtual void BeginPlay() override;
+
 	UFUNCTION(BlueprintCallable, Category = FireSystem)
 	void Fire();
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = State)
-	EFiringState FiringState = EFiringState::Locked;
+	EFiringState FiringState = EFiringState::Reloading;
 
 private:
 
 	double LastFireTime = 0;
-
+	FVector AimDirection;
 	UTankTurret * Turret = nullptr;
 	void MoveBarrelTurret(FVector AimDirection) const;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+	bool IsBarrelMoving() const;
 };

@@ -15,9 +15,15 @@ UTankAimingComponent::UTankAimingComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+}
+
+void UTankAimingComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	LastFireTime = FPlatformTime::Seconds();
 }
 
 void UTankAimingComponent::Initialise(UTankBarrel * BarrelToSet, UTankTurret * TurretToSet)
@@ -25,6 +31,23 @@ void UTankAimingComponent::Initialise(UTankBarrel * BarrelToSet, UTankTurret * T
 	if (!ensure(BarrelToSet) || !ensure(TurretToSet)) { return; }
 	Barrel = BarrelToSet;
 	Turret = TurretToSet;
+}
+
+void UTankAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)
+{
+	
+	if ((FPlatformTime::Seconds() - LastFireTime) < ReloadTimeSeconds)
+	{
+		FiringState = EFiringState::Reloading;
+	}
+	else if (IsBarrelMoving())
+	{
+		FiringState = EFiringState::Aiming;
+	}
+	else
+	{
+		FiringState = EFiringState::Locked;
+	}
 }
 
 void UTankAimingComponent::AimAt(FVector HitLocation)
@@ -45,7 +68,7 @@ void UTankAimingComponent::AimAt(FVector HitLocation)
 		0,
 		ESuggestProjVelocityTraceOption::DoNotTrace))
 	{
-		FVector AimDirection = LaunchVelocity.GetSafeNormal();
+		AimDirection = LaunchVelocity.GetSafeNormal();
 		MoveBarrelTurret(AimDirection);
 		//UE_LOG(LogTemp, Warning, TEXT("%f, aim solution found"), Time);
 	}
@@ -67,10 +90,15 @@ void UTankAimingComponent::MoveBarrelTurret(FVector AimDirection) const
 	Turret->Rotate(DeltaRotation.Yaw);
 }
 
+bool UTankAimingComponent::IsBarrelMoving() const
+{
+	if (!ensure(Barrel)) { return false; }
+	return !Barrel->GetForwardVector().Equals(AimDirection, .35f);
+}
+
 void UTankAimingComponent::Fire()
 {
-	bool IsReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeSeconds;
-	if (Barrel && IsReloaded && ensure(ProjectileBluePrint))
+	if (ensure(Barrel) && ensure(ProjectileBluePrint) && FiringState != EFiringState::Reloading)
 	{
 		AProjectile * Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileBluePrint, Barrel->GetSocketLocation(FName("Projectile")), Barrel->GetSocketRotation(FName("Projectile")));
 		Projectile->Shoot(LaunchSpeed);
