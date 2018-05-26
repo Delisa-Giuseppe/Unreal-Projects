@@ -88,7 +88,14 @@ void UTankAimingComponent::MoveBarrelTurret(FVector AimDirection) const
 	FRotator DeltaRotation = AimRotator - BarrelRotator;
 
 	Barrel->Elevate(DeltaRotation.Pitch);
-	Turret->Rotate(DeltaRotation.Yaw);
+	if (FMath::Abs(DeltaRotation.Yaw) < 180)
+	{
+		Turret->Rotate(DeltaRotation.Yaw);
+	}
+	else
+	{
+		Turret->Rotate(-DeltaRotation.Yaw);
+	}
 }
 
 bool UTankAimingComponent::IsBarrelMoving() const
@@ -105,6 +112,11 @@ void UTankAimingComponent::Fire()
 		Projectile->Shoot(LaunchSpeed);
 		LastFireTime = FPlatformTime::Seconds();
 	}
+}
+
+EFiringState UTankAimingComponent::GetFiringState() const
+{
+	return FiringState;
 }
 
 

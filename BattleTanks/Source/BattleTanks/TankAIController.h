@@ -14,8 +14,8 @@ class BATTLETANKS_API ATankAIController : public AAIController
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere)
-	float MaxDistancePlayer = 3000.f;
+	UPROPERTY(EditDefaultsOnly, Category = Setup)
+	float MaxDistancePlayer = 8000.f;
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

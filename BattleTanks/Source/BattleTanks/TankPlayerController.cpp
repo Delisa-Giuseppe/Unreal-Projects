@@ -58,6 +58,10 @@ bool ATankPlayerController::GetSightRayHitLocation(FVector& HitLocation) const
 			HitLocation = HitResult.Location;
 			return true;
 		}
+		else
+		{
+			return false;
+		}
 	}
 
 	HitLocation = FVector(0);
