@@ -12,7 +12,7 @@ class UTankTurret;
 class AProjectile;
 
 UENUM()
-enum class EFiringState : uint8 { Locked, Aiming, Reloading};
+enum class EFiringState : uint8 { Locked, Aiming, Reloading, OutOfAmmo};
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -29,6 +29,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = Firing)
 	float ReloadTimeSeconds = 3.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = Firing)
+	int32 MaxAmmo = 3;
 
 	UTankAimingComponent();
 	
@@ -51,6 +54,8 @@ public:
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = State)
 	EFiringState FiringState = EFiringState::Reloading;
+	UPROPERTY(BlueprintReadOnly, Category = State)
+	int32 CurrentAmmo;
 
 private:
 
